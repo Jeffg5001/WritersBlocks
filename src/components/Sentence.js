@@ -50,10 +50,9 @@ export default class Sentence extends React.Component{
         this.container && this.container.measure(this.onMeasure)
     }
     onMeasure(x, y, width, height, screenX, screenY){
-        //this.props.onRender(this.props.sentence, screenX, screenY, width, height)
+        this.props.onRender(this.props.sentence, screenX, screenY, width, height)
     }
     onPress(){
-        console.log(this.props)
         this.props.onPress(this.props.sentence)
     }
 

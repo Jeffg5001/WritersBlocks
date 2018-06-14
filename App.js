@@ -1,149 +1,82 @@
 import React from 'react';
-import { StyleSheet, TextInput, Text, Button, View, Animated, PanResponder, LayoutAnimation, StatusBar } from 'react-native';
-import Sentence from './src/components/Sentence'
+import { View, TextInput, Button, KeyboardAvoidingView, StatusBar, StyleSheet } from 'react-native';
+import Container from './src/components/Container';
+
+function splitEachSentence(string){
+  // const result = [];
+  // let currentSentence = '';
+  // for( letter of string){
+  //   currentSentence += letter
+  //   if(/\?|\.|\!/.test(letter)){
+  //     result.push(currentSentence)
+  //     currentSentence=''
+  //   }
+    
+  // }
+  // if(currentSentence) result.push(currentSentence);
+  return string.replace(/(\.+|\:|\!|\?)(\"*|\'*|\)*|}*|]*)(\s|\n|\r|\r\n)/gm, "$1$2|").split("|")
+}
 
 export default class App extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      text:'',
       rearrange:false,
       textArr:[],
+      text:'',
     }
-    this.removeSentence = this.removeSentence.bind(this)
-    // this.onRenderSentence = this.onRenderSentence.bind(this)
-    // this.updateTextState = this.updateTextState.bind(this)
+    
   }
-  componentWillMount(){
-    this.panResponder = this.createPanResponder(PanResponder)
-  }
-
-  componentWillUpdate() {
-    LayoutAnimation.configureNext({
-      ...LayoutAnimation.Presets.easeInEaseOut,
-      duration: this.props.animationDuration
-    });
-  }
-
-  createPanResponder(PanResponder){
-   return PanResponder.create({
-      // Handle drag gesture
-    onMoveShouldSetPanResponder: (_, gestureState) => this.onMoveShouldSetPanResponder(gestureState),
-    onPanResponderGrant: (_, gestureState) => this.onPanResponderGrant(),
-    onPanResponderMove: (_, gestureState) => this.onPanResponderMove(gestureState),
-    // Handle drop gesture
-    onPanResponderRelease: (_, gestureState) => this.onPanResponderEnd(),
-    onPanResponderTerminate: (_, gestureState) => this.onPanResponderEnd(),
   
-    })
-  }
-  // updateTextState(sentenceObj, props){
-  //   this.setState((state)=>{
-      
-  //     const index = state.textArr.findIndex(title =>{
-  //       return title.title === sentenceObj.title
-  //     });
-      
-  //     return {
-  //       textArr: [...state.textArr.slice(0,index), {
-  //         ...state.textArr[index], 
-  //         ...props
-  //       },
-  //       ...state.textArr.slice(index + 1),
-  //       ]
-  //     }
-  //   })
-  // }
-  // onRenderSentence(sentenceObj, screenX, screenY, width, height){
-
-  //   this.updateTextState(sentenceObj, {tlX:screenX, tlY:screenY, brX:screenX + width, brY: screenY + height})
-  // }
-
-  onMoveShouldSetPanResponder = (gestureState) => {
-    
-    return true;
-  };
-
-  onPanResponderGrant(){
-    
-  }
-  removeSentence(sentence){
-    
-    this.setState((state) => {
-      const index = state.textArr.findIndex((text) => text.title === sentence.title);
-      return {
-        textArr: [
-          // Remove the tag
-          ...state.textArr.slice(0, index),
-          ...state.textArr.slice(index + 1),
-        ]
-      }
-    });
-  };
-  onPanResponderMove(gestureState){
-    const {moveX, moveY} = gestureState;
-    
-
-  }
-  onPanResponderEnd() {
-    
-  };
-  static defaultProps = {
-    animationDuration: 250
-  };
   render() {
-    
     return (
       <View style={styles.container}>
-      <StatusBar hidden={true} />
-        <Button 
-        title='Edit'
-        disabled = {!this.state.rearrange}
-        onPress = {evt =>this.setState({rearrange: false, text: this.state.textArr.map(sentenceObj=>sentenceObj.title).join('.')})}
-        />
-        <Button 
-        title='Rearrange'
-        disabled = {this.state.rearrange}
-        onPress = {evt =>this.setState({rearrange: true})}
-        />
-      { this.state.rearrange ?
-        this.state.textArr.map( sentence =>( 
-          // <View
-          // onResponderMove={this.handleResponderMove}
-          // onMoveShouldSetResponder={(evt)=>true}
-          // onResponderGrant={(evt)=>{
-          // }}
-          // key={sentence+'view'+`${Math.random()}`}
-          // >
-          //   <Text 
-          //     selectable={false}
-          //     key={sentence+`${Math.random()}`}
-          //   >
-          //   {sentence}
-          //   </Text>
-          // </View>)
-          <View key={sentence+'view'+`${Math.random()}`}
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-          }}
-          {...this.panResponder.panHandlers}
-          >
-          <Sentence  sentence={{ title:sentence.title }} onPress={this.removeSentence}  />
-          </View>))
-        :
-        <TextInput
-          onChangeText={text =>this.setState({text, textArr:text.split('.').map(title => ({title}))})}
-          placeholder='type here'
-          value = {this.state.text}
-          multiline={true}
-          
-        />}
+        <StatusBar hidden={true} />
+        { this.state.rearrange ?
+          <Container sentences={this.state.textArr}/>
+              :
+              <KeyboardAvoidingView
+              behavior="padding" 
+              enabled
+              style={{
+                backgroundColor:'#8f5',
+                flex:2,        
+              }}
+              >
+              <TextInput
+              onChangeText={text =>this.setState((state)=>{
+
+                  return {text, textArr:splitEachSentence(text)}
+
+                })}
+              placeholder='type here'
+              value = {this.state.text}
+              multiline={true}
+              numberOfLines={100}
+              disableFullscreenUI={false}
+              autoFocus={true}
+              />
+              </KeyboardAvoidingView>
+            }
+        <KeyboardAvoidingView
+              behavior="padding" 
+              enabled
+              >
+              {this.state.rearrange ? 
+                <Button 
+                title='Edit'
+                onPress = {evt =>this.setState({rearrange: false, text: this.state.textArr.join(' ')})}
+                />:
+                <Button 
+                title='Rearrange'
+                onPress = {evt =>this.setState({rearrange: true})}
+                />
+              }
+              </KeyboardAvoidingView>
       </View>
     );
   }
-}
-
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
