@@ -1,91 +1,87 @@
-import React from 'react';
-import { View, TextInput, Button, KeyboardAvoidingView, StatusBar, StyleSheet } from 'react-native';
-import Container from './src/components/Container';
+// @flow
 
-function splitEachSentence(string){
-  // const result = [];
-  // let currentSentence = '';
-  // for( letter of string){
-  //   currentSentence += letter
-  //   if(/\?|\.|\!/.test(letter)){
-  //     result.push(currentSentence)
-  //     currentSentence=''
-  //   }
-    
-  // }
-  // if(currentSentence) result.push(currentSentence);
-  return string.replace(/(\.+|\:|\!|\?)(\"*|\'*|\)*|}*|]*)(\s|\n|\r|\r\n)/gm, "$1$2|").split("|")
-}
+import React, { PureComponent } from 'react';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import Tags from './src/components/Container';
+import {Provider} from 'react-redux';
+import store from './src/Store/index';
+import Document from './src/components/Document';
+import Buttons from './src/components/Buttons'
 
-export default class App extends React.Component {
-  constructor(props){
-    super(props)
-    this.state = {
-      rearrange:false,
-      textArr:[],
-      text:'',
-    }
-    
+
+
+
+
+export default class Main extends PureComponent {
+
+  state = {
+
+    rearrange: false
+  };
+
+
+  handleRearrangePress = (e) => {
+    this.setState({rearrange: true})
   }
-  
+
+  handleEditPress = (e) => {
+    this.setState({rearrange: false})
+  }
+
   render() {
     return (
+      <Provider store={store}>
       <View style={styles.container}>
         <StatusBar hidden={true} />
+
+
+        <View style={styles.header}>
+          <Text style={[styles.text, styles.title]}>
+            Let's drag and drop some sentences!
+          </Text>
+          <Text style={styles.text}>
+            Drag and drop sentences to reorder, tap to remove or press Add New to add new sentences.
+          </Text>
+        </View>
         { this.state.rearrange ?
-          <Container sentences={this.state.textArr}/>
+          <Tags
+          ref={component => this._sentencesComponent = component }
+        />
               :
-              <KeyboardAvoidingView
-              behavior="padding" 
-              enabled
-              style={{
-                backgroundColor:'#8f5',
-                flex:2,        
-              }}
-              >
-              <TextInput
-              onChangeText={text =>this.setState((state)=>{
-
-                  return {text, textArr:splitEachSentence(text)}
-
-                })}
-              placeholder='type here'
-              value = {this.state.text}
-              multiline={true}
-              numberOfLines={100}
-              disableFullscreenUI={false}
-              autoFocus={true}
-              />
-              </KeyboardAvoidingView>
+              <Document />
             }
-        <KeyboardAvoidingView
-              behavior="padding" 
-              enabled
-              >
-              {this.state.rearrange ? 
-                <Button 
-                title='Edit'
-                onPress = {evt =>this.setState({rearrange: false, text: this.state.textArr.join(' ')})}
-                />:
-                <Button 
-                title='Rearrange'
-                onPress = {evt =>this.setState({rearrange: true})}
-                />
-              }
-              </KeyboardAvoidingView>
+        <Buttons handleEditPress={this.handleEditPress} handleRearrangePress={this.handleRearrangePress} />
+        
+
       </View>
+      </Provider>
     );
   }
-};
+
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexWrap: 'wrap',
-    backgroundColor: '#7f4',
-    paddingVertical: 35,
-    // top:31,
-    // alignItems: 'center',
-    // justifyContent: 'center',
-    paddingHorizontal: 15
+    backgroundColor: '#2196F3',
+  },
+  header: {
+    marginHorizontal: 20,
+    marginVertical: 50,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  text: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

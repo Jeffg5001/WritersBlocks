@@ -1,80 +1,84 @@
-import React from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 
-const styles = {
-    container: {
-      marginBottom: 8,
-      marginRight: 6,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-    },
-    sentence: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, .33)',
-      borderColor: 'rgba(255, 255, 255, .25)',
-      borderRadius: 20,
-      borderWidth: 1,
-      paddingHorizontal: 10,
-      paddingVertical: 3,
-    },
-    sentenceBeingDragged: {
-      backgroundColor: 'rgba(255, 255, 255, .01)',
-      borderStyle: 'dashed',
-    },
-    title: {
-      color: '#FFFFFF',
-      fontFamily: 'Avenir',
-      fontSize: 15,
-      fontWeight: 'normal',
-    },
+import React, { PureComponent } from 'react';
+import {
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+
+
+export default class Sentence extends PureComponent {
+
+ 
+  // Append styles.sentenceBeingDragged style if sentence is being dragged
+  getSentenceStyle = ()=> ({
+    ...styles.sentence,
+    ...(this.props.sentence.isBeingDragged ? styles.sentenceBeingDragged : {}),
+  });
+
+  // Call view container's measure function to measure sentence position on the screen
+  onLayout = () => {
+    this.container && this.container.measure(this.onMeasure);
   };
-export default class Sentence extends React.Component{
-    constructor(props){
-        super(props)
-        this.state = {
-        }
-        this.onPress = this.onPress.bind(this)
-        this.onLayout = this.onLayout.bind(this)
-        this.onMeasure = this.onMeasure.bind(this)
-    }
-    
-    getSentenceStyle(){
-        return {
-            ...styles.sentence,
-            ...(this.props.sentence.isBeingDragged ? styles.sentenceBeingDragged: {})
-        }
-    }
-    onLayout(){
-        this.container && this.container.measure(this.onMeasure)
-    }
-    onMeasure(x, y, width, height, screenX, screenY){
-        this.props.onRender(this.props.sentence, screenX, screenY, width, height)
-    }
-    onPress(){
-        this.props.onPress(this.props.sentence)
-    }
 
-        
+  // Pass sentence coordinates up to the parent component
+  onMeasure = (x,
+               y,
+               width,
+               height,
+               screenX,
+               screenY) => {
+    this.props.onRender(this.props.sentence, screenX, screenY, width, height);
+  };
 
-    render(){
-        const { sentence: { title } } = this.props;
-        return (
-        <View 
+  // Handle sentence taps
+  onPress = () => {
+    this.props.onPress(this.props.sentence);
+  };
+
+  render() {
+    const { sentence: { title } } = this.props;
+    return (
+      <View
         ref={el => this.container = el}
         style={styles.container}
         onLayout={this.onLayout}
+      >
+        <TouchableOpacity
+          style={this.getSentenceStyle()}
+          onPress={this.onPress}
         >
-            <TouchableOpacity
-            style={this.getSentenceStyle()}
-            onPress={this.onPress}
-            >
-            <Icon name="ios-close-circle-outline" size={16} color="#FFF" />
-                <Text>{' '}</Text>
-                <Text style={styles.title}>{title}</Text>
-            </TouchableOpacity>
-        </View>
-    )
-    }
+          <Text style={styles.title}>{title}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
 }
+
+const styles = {
+  container: {
+    marginBottom: 8,
+    marginRight: 6,
+  },
+  sentence: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, .33)',
+    borderColor: 'rgba(255, 255, 255, .25)',
+    borderRadius: 20,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  sentenceBeingDragged: {
+    backgroundColor: 'rgba(255, 255, 255, .01)',
+    borderStyle: 'dashed',
+  },
+  title: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: 'normal',
+  },
+};
